@@ -85,7 +85,6 @@ function display(og, res){
     console.log('--------------------------------')
 }
 
-const arr = [2,0,2,2];
 const arr2d=[
 [2,2,2,0],
 [0,2,0,2],
@@ -96,6 +95,7 @@ const left = mergeResult2d(arr2d, 'left');
 const right = mergeResult2d(arr2d, 'right');
 const up = mergeResult2d(arr2d, 'up');
 const down = mergeResult2d(arr2d, 'down');
+
 display(arr2d, left);
 display(arr2d, right);
 display(arr2d, up);
