@@ -31,11 +31,14 @@ function padRight(arr,n){
 }
 
 function mergeToLeft(arr){
+    let points = 0;
     const res = [];
     let i = 0;
     while(i<arr.length){
         if(i+1<arr.length&&arr[i]===arr[i+1]){
-            res.push(arr[i]*2);
+            let point = arr[i]*2;
+            res.push(point);
+            points += point;
             i+=2;
         }
         else{
@@ -43,11 +46,12 @@ function mergeToLeft(arr){
             i++;
         }
     }
-    return res;
+    return {result:res, total:points};
 }
 
 //-----------------------Move logic-------------------------
-function move(board, direction){
+function slide(board, direction){
+    let points = 0;
     const validKeys = ['left', 'right', 'up', 'down'];
     const n = board.length; //the length of grid
     const res = board.map(row=>[...row]);
@@ -55,7 +59,6 @@ function move(board, direction){
         throw new Error(`Invalid direction: ${direction}`);
     }
     for(let i=0; i<n; i++){
-        let merged = undefined;
         let arr = [];
         if(direction==='up'||direction==='down'){
             arr = colToRow(board, i);
@@ -65,12 +68,14 @@ function move(board, direction){
         const rawData = removeZero(arr);
         let cur = [];
         if(direction==='left'||direction==='up'){
-            merged = mergeToLeft(rawData);
-            cur = padRight(merged, n);
+            const {result, total} = mergeToLeft(rawData);
+            points += total;
+            cur = padRight(result, n);
         }
         else if(direction==='right'||direction==='down'){
-            merged = mergeToLeft(rawData.reverse());
-            cur = padRight(merged, n).reverse();
+            const {result, total} = mergeToLeft(rawData.reverse());
+            points += total;
+            cur = padRight(result, n).reverse();
         }
 
         if(direction==='left'||direction==='right'){
@@ -79,7 +84,11 @@ function move(board, direction){
             rowToCol(cur, res, i);
         }
     }
-    return res;
+    return {result:res, total:points};
+}
+
+function move(board, direction){
+    return slide(board, direction).result;
 }
 //-----------------------HasMoves logics-------------------------
 
@@ -120,7 +129,7 @@ function spaces(board){
 function spawn(board, rng=Math.random){
     const res = board.map(row=>[...row]);
     const canSpawn = spaces(res);
-    if(!canSpawn.length>0){
+    if(!(canSpawn.length>0)){
         throw new Error("The board is full");
     }
     const spawnList = [2,4];
@@ -132,7 +141,11 @@ function spawn(board, rng=Math.random){
     res[i][j] = spawnList[randNum];
     return res;
 }
+//-----------------------Score function-------------------------
 
+function score(board, direction){
+    return slide(board, direction).total;
+}
 
 //-----------------------Display function-------------------------
 function display(og, res){
@@ -143,11 +156,12 @@ function display(og, res){
     console.log('--------------------------------')
 }
 
-// const arr2d=[
-// [2,2,2,0],
-// [0,2,0,2],
-// [2,2,4,2],
-// [0,0,0,0]];
+const arr2d=[
+[2,2,2,0],
+[0,2,0,2],
+[2,2,4,2],
+[0,0,0,0]];
+console.log(score(arr2d, 'left'));
 
 // const left = mergeResult2d(arr2d, 'left');
 // const right = mergeResult2d(arr2d, 'right');
@@ -158,5 +172,3 @@ function display(og, res){
 // display(arr2d, right);
 // display(arr2d, up);
 // display(arr2d, down);
-
-
