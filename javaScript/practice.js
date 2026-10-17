@@ -108,7 +108,7 @@ function mergeResult(arr, key){
 }
 
 
-function mergeResult2d(arr2d, key){
+function move(arr2d, key){
     const validKeys = ['left', 'right', 'up', 'down'];
     if(!(validKeys.includes(key))){
         return false;
@@ -166,4 +166,3 @@ const arr2d=[
 // console.log(mergeResult2d(arr2d, 'down'));
 
 let a = [1,2,3,4];
-console.log(a.reverse());

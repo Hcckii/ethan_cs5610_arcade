@@ -1,3 +1,4 @@
+//-----------------------Merging logics-------------------------
 function removeZero(arr){
     return arr.filter(n=>n!==0);
 }
@@ -20,7 +21,6 @@ function rowToCol(src, dest, idx){ // return a 2d array of converted row to colu
     return dest;
 }
 
-//------------------------- padding functions -------------------------
 function padRight(arr,n){
     const res = [...arr];
     const m = n - arr.length;
@@ -46,37 +46,103 @@ function mergeToLeft(arr){
     return res;
 }
 
-function mergeResult2d(arr2d, key){
-    const n = arr2d.length; //the length of grid
-    const res = arr2d.map(row=>[...row]);
-    
+//-----------------------Move logic-------------------------
+function move(board, direction){
+    const n = board.length; //the length of grid
+    const res = board.map(row=>[...row]);
     for(let i=0; i<n; i++){
         let merged = undefined;
         let arr = [];
-        if(key==='up'||key==='down'){
-            arr = colToRow(arr2d, i);
-        }else if(key==='left'||key==='right'){
-            arr = arr2d[i];
+        if(direction==='up'||direction==='down'){
+            arr = colToRow(board, i);
+        }else if(direction==='left'||direction==='right'){
+            arr = board[i];
         }
         const rawData = removeZero(arr);
         let cur = [];
-        if(key==='left'||key==='up'){
+        if(direction==='left'||direction==='up'){
             merged = mergeToLeft(rawData);
             cur = padRight(merged, n);
         }
-        else if(key==='right'||key==='down'){
+        else if(direction==='right'||direction==='down'){
             merged = mergeToLeft(rawData.reverse());
             cur = padRight(merged, n).reverse();
         }
-        if(key==='left'||key==='right'){
+        if(direction==='left'||direction==='right'){
             res[i] = cur;
-        }else if(key==='up'||key==='down'){
+        }else if(direction==='up'||direction==='down'){
             rowToCol(cur, res, i);
         }
     }
     return res;
 }
+//-----------------------HasMoves logics-------------------------
 
+function validateMove(board1, board2){
+    const n = board1.length;
+    for(let i=0; i<n; i++){
+        for(let j=0; j<n; j++){
+            if(board1[i][j]!==board2[i][j]){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+function hasMoves(board){
+    return validateMove(board, move(board, 'left'))
+    ||validateMove(board, move(board, 'right'))
+    ||validateMove(board, move(board, 'up'))
+    ||validateMove(board, move(board, 'down'));
+}
+
+//-----------------------Spawn logics-------------------------
+
+function spaces(board){
+    const availible = [];
+    let hasSpot = false;
+    const n = board.length;
+    for(let i=0; i<n; i++){
+        for(let j=0; j<n; j++){
+            if(board[i][j]===0){
+                availible.push([i, j]);
+                hasSpot = true;
+            }
+        }
+    }
+    return [hasSpot, availible];
+}
+
+function spawn(board, rng=Math.random()){
+    const [hasSpot, canSpawn] = spaces(res);
+    const res = board.map(row=>[...row]);
+    if(hasSpot){
+        const spawnList = [2,4];
+        const n = canSpawn.length;
+        const m = spawnList.length;
+        const randSpot = Math.floor(rng*n);
+        const randNum = Math.floor(rng*m);
+        const[i, j]=canSpawn[randSpot];
+        res[i][j] = spawnList[randNum];
+    }
+    return res;
+}
+
+// const board1 = Array.from({length:4}, ()=>Array(4).fill(0));
+
+// const board2 = spawn(board1);
+// console.log(board1, board2);
+// console.log(board1);
+// spawn(board1);
+// console.log(board1);
+
+
+
+
+
+
+//-----------------------Display function-------------------------
 function display(og, res){
     console.log('--------------------------------')
     for(let i=0; i<og.length; i++){
@@ -85,18 +151,20 @@ function display(og, res){
     console.log('--------------------------------')
 }
 
-const arr2d=[
-[2,2,2,0],
-[0,2,0,2],
-[2,2,4,2],
-[0,0,0,0]];
+// const arr2d=[
+// [2,2,2,0],
+// [0,2,0,2],
+// [2,2,4,2],
+// [0,0,0,0]];
 
-const left = mergeResult2d(arr2d, 'left');
-const right = mergeResult2d(arr2d, 'right');
-const up = mergeResult2d(arr2d, 'up');
-const down = mergeResult2d(arr2d, 'down');
+// const left = mergeResult2d(arr2d, 'left');
+// const right = mergeResult2d(arr2d, 'right');
+// const up = mergeResult2d(arr2d, 'up');
+// const down = mergeResult2d(arr2d, 'down');
 
-display(arr2d, left);
-display(arr2d, right);
-display(arr2d, up);
-display(arr2d, down);
+// display(arr2d, left);
+// display(arr2d, right);
+// display(arr2d, up);
+// display(arr2d, down);
+
+
