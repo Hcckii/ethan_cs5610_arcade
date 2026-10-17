@@ -48,8 +48,12 @@ function mergeToLeft(arr){
 
 //-----------------------Move logic-------------------------
 function move(board, direction){
+    const validKeys = ['left', 'right', 'up', 'down'];
     const n = board.length; //the length of grid
     const res = board.map(row=>[...row]);
+    if(!validKeys.includes(direction)){
+        throw new Error(`Invalid direction: ${direction}`);
+    }
     for(let i=0; i<n; i++){
         let merged = undefined;
         let arr = [];
@@ -68,6 +72,7 @@ function move(board, direction){
             merged = mergeToLeft(rawData.reverse());
             cur = padRight(merged, n).reverse();
         }
+
         if(direction==='left'||direction==='right'){
             res[i] = cur;
         }else if(direction==='up'||direction==='down'){
@@ -78,7 +83,7 @@ function move(board, direction){
 }
 //-----------------------HasMoves logics-------------------------
 
-function validateMove(board1, board2){
+function compare(board1, board2){
     const n = board1.length;
     for(let i=0; i<n; i++){
         for(let j=0; j<n; j++){
@@ -91,55 +96,42 @@ function validateMove(board1, board2){
 }
 
 function hasMoves(board){
-    return validateMove(board, move(board, 'left'))
-    ||validateMove(board, move(board, 'right'))
-    ||validateMove(board, move(board, 'up'))
-    ||validateMove(board, move(board, 'down'));
+    return compare(board, move(board, 'left'))
+    ||compare(board, move(board, 'right'))
+    ||compare(board, move(board, 'up'))
+    ||compare(board, move(board, 'down'));
 }
 
 //-----------------------Spawn logics-------------------------
 
 function spaces(board){
-    const availible = [];
-    let hasSpot = false;
+    const available = [];
     const n = board.length;
     for(let i=0; i<n; i++){
         for(let j=0; j<n; j++){
             if(board[i][j]===0){
-                availible.push([i, j]);
-                hasSpot = true;
+                available.push([i, j]);
             }
         }
     }
-    return [hasSpot, availible];
+    return available;
 }
 
-function spawn(board, rng=Math.random()){
-    const [hasSpot, canSpawn] = spaces(res);
+function spawn(board, rng=Math.random){
     const res = board.map(row=>[...row]);
-    if(hasSpot){
-        const spawnList = [2,4];
-        const n = canSpawn.length;
-        const m = spawnList.length;
-        const randSpot = Math.floor(rng*n);
-        const randNum = Math.floor(rng*m);
-        const[i, j]=canSpawn[randSpot];
-        res[i][j] = spawnList[randNum];
+    const canSpawn = spaces(res);
+    if(!canSpawn.length>0){
+        throw new Error("The board is full");
     }
+    const spawnList = [2,4];
+    const n = canSpawn.length;
+    const m = spawnList.length;
+    const randSpot = Math.floor(rng()*n);
+    const randNum = Math.floor(rng()*m);
+    const[i, j]=canSpawn[randSpot];
+    res[i][j] = spawnList[randNum];
     return res;
 }
-
-// const board1 = Array.from({length:4}, ()=>Array(4).fill(0));
-
-// const board2 = spawn(board1);
-// console.log(board1, board2);
-// console.log(board1);
-// spawn(board1);
-// console.log(board1);
-
-
-
-
 
 
 //-----------------------Display function-------------------------
