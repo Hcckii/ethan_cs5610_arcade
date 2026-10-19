@@ -1,0 +1,128 @@
+:root {
+    --color-bg: azure;
+    --color-bg-game:rgba(255, 140, 0, 0.343);
+    --color-bg-about: rgba(255, 243, 205, 0.852);
+    --color-accent: lightblue;
+    --color-focus: rgb(131, 72, 72);
+    
+}
+
+*{
+    box-sizing: border-box;
+}
+
+body{
+    display: flex;
+    font-family: Arial;
+    flex-direction: column;
+    align-items: center;
+    background-color: var(--color-bg);
+    min-height: 100vh;
+}
+
+main{
+    padding-top: 20px;
+}
+
+nav {
+    padding:5px;
+    position: sticky;
+    top: 0;
+    background-color: rgba(255, 255, 255, 0.834);
+    border: solid gray 1px;
+}
+
+nav p{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+nav ul{
+    display: flex;
+    list-style: none;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+}
+nav a:hover{
+    background-color: var(--color-accent);
+}
+nav a:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+nav a {
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+details ul{
+    display:flex;
+    flex-direction: column;
+    list-style: none;
+    gap: 1px;
+    margin: 0;
+    padding: 0;
+}
+.current-page{
+    background-color: lightgray;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+
+.site-title{
+    display:flex;
+}
+
+.grid-container{
+    display:grid;
+    width: 70%;
+    aspect-ratio: 1/1;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    border:solid black 1px;
+}
+
+.centered{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+}
+
+
+h1{
+    font-size: 1.5rem;
+}
+h2{
+    font-size: 1rem;
+}
+
+img{
+    width: 80vw;
+    height: auto;
+}
+@media (min-width:864px){
+    h1{
+        font-size: 2.5rem;
+    }
+    h2{
+        font-size: 2rem;
+    }
+    .grid-container{
+        width: 40%;
+    }
+    .container{
+        width: 40%;
+    }
+}
+
+footer{
+    margin-top: auto;
+    color:gray;
+}
