@@ -13,7 +13,6 @@
         } catch {
         }
     });
-
     function loadGame() {
         try {
             const saved = JSON.parse(localStorage.getItem('2048-game'));
@@ -83,22 +82,21 @@
     <header class="centered">
         <div class="titles">
             <h1>2048</h1>
-            <div class="scores" aria-live="polite">
-                <div>Score: {total}</div>
-                <div>Best: {scores.best}</div>
-            </div>
         </div>
     </header>
     <div class="status" aria-live="polite">
         {#if gameOver}
-        <div class="status-gameOver" in:scale={{ duration:prefersReducedMotion?0:400, start: 0.5 }} out:fade>Game Over</div>
+        <div class="status-gameOver" in:scale={{ duration:prefersReducedMotion.current?0:400, start: 0.5 }} out:fade>Game Over</div>
         {/if}
         {#if win&&!gameOver}
             <div class="status-win" transition:fade>You Win!</div>
         {/if}
     </div>
-    
-    <button class="newGame" onclick={newGame}>New Game</button>
+    <div class="scores">
+        <div>Score: {total}</div>
+        <button class="newGame" onclick={newGame}>New Game</button>
+        <div>Best: {scores.best}</div>
+    </div>
     <div class={win?"winBoard":"board"}>
         {#each board as row}
             {#each row as cell}
@@ -165,16 +163,21 @@
     }
     h1{
         margin:0px;
-        font-size: 60px;
-        color:rgb(255, 255, 255);
-        
+        margin-top: 5px;
+        font-size: clamp(3rem, 20vw, 70px);
+        font-weight: bold;
+        -webkit-text-stroke: 3px var(--color-bg-2048);
+        text-shadow: 5px 5px 0 rgb(0, 0, 0);
+        font-family: var(--font-2048);
+        color:var(--color-title-2048);
     }
     .scores{
         display: flex;
-        color:white;
+        color:var(--color-title-2048);
         font-weight: bold;
-        font-size: 20px;
-        width: 100%;
+        font-size: clamp(1.1rem, 5vw, 20px);
+        width: 90%;
+        align-items: center;
         justify-content: space-around;
     }
 
@@ -207,7 +210,7 @@
     .newGame{
         color: var(--color-title-2048);
         font-weight: bold;
-        font-size: 20px;
+        font-size: clamp(1.1rem, 5vw, 20px);
         margin:0px;
         padding:5px;
         border-radius: 15px;
@@ -218,8 +221,6 @@
         width: min(80vw, 500px);
         flex-direction: column;
         align-items: center;
-        border-radius: 15px;
-        background-color: var(--color-title-2048);
         margin:5px;
         padding:5px;
     }

@@ -20,9 +20,9 @@
     }
     @media (pointer: coarse){
         .keyboard{
-            margin:10px;
-            gap:10px;
-            width: min(60vw, 300px);
+            margin:5px;
+            gap:5px;
+            width: min(55vw, 300px);
             aspect-ratio: 1/1;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
