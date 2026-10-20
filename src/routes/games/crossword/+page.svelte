@@ -1,6 +1,6 @@
 <main class="centered">
     <header>
-        <h1>Crossword Game</h1>
+        <h1>CROSSWORD</h1>
     </header>
     
     <div class="grid-container">

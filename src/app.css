@@ -4,8 +4,9 @@
     --color-bg-game:rgba(255, 140, 0, 0.343);
     --color-bg-about: rgba(255, 243, 205, 0.852);
     --color-accent: rgb(118, 118, 118);
-    --color-focus: rgb(131, 72, 72);
-    --color-bg-2048:#786b6b;
+    --color-focus: #834848;
+    --color-bg-2048:#8bafc3;
+    --color-title-2048:#2f5a73;
 	--tile-2: #f9eee7;
     --tile-2-txt: #342214;
 	--tile-4: #f4decd;
@@ -28,6 +29,7 @@
     --tile-1024-txt: #ffffff;
 	--tile-2048: #492509;
     --tile-2048-txt: #ffffff;
+    --font-2048:'Press Start 2P';
 }
 
 *{
