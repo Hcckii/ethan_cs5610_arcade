@@ -43,9 +43,10 @@
 </footer>
 
 <style>
-    img{
+img{
     width: 50%;
     height: auto;
+    border-radius: 10px;
 }
 
 h2{

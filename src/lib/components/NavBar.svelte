@@ -1,14 +1,16 @@
 <script>
     import NavLink from '#lib/components/NavLink.svelte';
     const navLinks = [{href:'/', label:'Home'}, {href:'/about', label:'About Me'}, {href:'/contact', label:'Contact'}];
-    const gameLinks = [{href:'/games/crossword', label:'Cross word'}, {href:'/games/2048', label:'2048'}];
+    const gameLinks = [{href:'/games/crossword', label:'Crossword'}, {href:'/games/2048', label:'2048'}];
 </script>
 
-
-
 <nav>
-	<p class="site-title">Chang Chi (Ethan) Hua</p>
-	<ul>
+    <div class="compound">
+        <img src="/images/yujiro.png" alt="a face of Hanma Yujiro">
+        Ethan Hua's Website
+    </div>
+    <div class="content">
+	<ul class="contentUl">
 		{#each navLinks as link (link.href)}
             <li>
                 <NavLink href={link.href} label={link.label} />
@@ -19,51 +21,72 @@
                 <summary>Games</summary>
                 <ul>
                     {#each gameLinks as link (link.href)}
-                        <li>
+                        <li class="gameContent">
                             <NavLink href={link.href} label={link.label} />
                         </li>
                     {/each}
                 </ul>
-           
             </details>
         </li>
 	</ul>
+    </div>
 </nav>
 
 <style>
-	nav {
+
+nav img {
+	width: 1.5em;
+	height: 1.5em;
+}
+.gameContent{
     padding:5px;
+}
+nav {
+    font-size: clamp(14px, 2vw, 16px);
+    color:white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding:10px;
+    width: 100%;
     position: sticky;
     top: 0;
-    background-color: rgba(255, 255, 255, 0.834);
-    border: solid gray 1px;
+    background-color: var(--color-title);
 }
-
-nav p{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 0;
-    padding: 0;
-}
-nav ul{
+.contentUl{
     display: flex;
     list-style: none;
-    gap: 10px;
+    align-items: center;
+    gap: 2rem;
     margin: 0;
     padding: 0;
 }
-nav a:hover{
-    background-color: var(--color-accent);
+.content{
+    margin-right: 2rem;
 }
-nav a:focus-visible {
-    outline: 3px solid var(--color-focus);
-    outline-offset: 2px;
+.compound{
+    margin-left:2rem;
+    font-weight: bold;
+    padding:5px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap:5px;
 }
-
-nav a {
-    text-decoration: none;
-    transition: background-color 0.2s;
+@media (max-width: 600px) {
+	nav {
+		flex-direction: column;
+		gap: 10px;
+	}
+	.contentUl {
+		gap: 1rem;
+		flex-wrap: wrap;
+		justify-content: center;
+	}
+	.content,
+	.compound {
+		margin: 0;
+	}
 }
 
 </style>

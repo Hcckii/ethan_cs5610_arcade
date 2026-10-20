@@ -1,10 +1,33 @@
 :root {
-    --color-bg: azure;
+    --color-bg: rgb(224, 224, 224);
+    --color-title:rgb(44, 44, 44);
     --color-bg-game:rgba(255, 140, 0, 0.343);
     --color-bg-about: rgba(255, 243, 205, 0.852);
-    --color-accent: lightblue;
+    --color-accent: rgb(118, 118, 118);
     --color-focus: rgb(131, 72, 72);
-    
+    --color-bg-2048:#786b6b;
+	--tile-2: #f9eee7;
+    --tile-2-txt: #342214;
+	--tile-4: #f4decd;
+    --tile-4-txt: #342214;
+	--tile-8: #f0caad;
+    --tile-8-txt: #342214;
+	--tile-16: #ecb68d;
+    --tile-16-txt: #342214;
+	--tile-32: #e9a36d;
+    --tile-32-txt: #342214;
+	--tile-64: #e68f4c;
+    --tile-64-txt: #342214;
+	--tile-128: #ad5c1f;
+    --tile-128-txt: #ffffff;
+	--tile-256: #934f1a;
+    --tile-256-txt: #ffffff;
+	--tile-512: #7b4114;
+    --tile-512-txt: #ffffff;
+	--tile-1024: #62330f;
+    --tile-1024-txt: #ffffff;
+	--tile-2048: #492509;
+    --tile-2048-txt: #ffffff;
 }
 
 *{
@@ -12,6 +35,7 @@
 }
 
 body{
+    margin:0px;
     display: flex;
     font-family: Arial;
     flex-direction: column;
@@ -24,41 +48,6 @@ main{
     padding-top: 20px;
 }
 
-nav {
-    padding:5px;
-    position: sticky;
-    top: 0;
-    background-color: rgba(255, 255, 255, 0.834);
-    border: solid gray 1px;
-}
-
-nav p{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 0;
-    padding: 0;
-}
-nav ul{
-    display: flex;
-    list-style: none;
-    gap: 10px;
-    margin: 0;
-    padding: 0;
-}
-nav a:hover{
-    background-color: var(--color-accent);
-}
-nav a:focus-visible {
-    outline: 3px solid var(--color-focus);
-    outline-offset: 2px;
-}
-
-nav a {
-    text-decoration: none;
-    transition: background-color 0.2s;
-}
-
 details ul{
     display:flex;
     flex-direction: column;
@@ -66,16 +55,6 @@ details ul{
     gap: 1px;
     margin: 0;
     padding: 0;
-}
-.current-page{
-    background-color: lightgray;
-    font-weight: bold;
-    text-decoration: underline;
-}
-
-
-.site-title{
-    display:flex;
 }
 
 .grid-container{
@@ -88,6 +67,7 @@ details ul{
 }
 
 .centered{
+    padding: 0px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -98,9 +78,11 @@ details ul{
 
 h1{
     font-size: 1.5rem;
+    color:var(--color-title);
 }
 h2{
     font-size: 1rem;
+    color:var(--color-title);
 }
 
 img{
@@ -120,9 +102,12 @@ img{
     .container{
         width: 40%;
     }
+    nav{
+        font-size:1vw
+    }
 }
 
 footer{
     margin-top: auto;
-    color:gray;
+    color:rgb(0, 0, 0);
 }

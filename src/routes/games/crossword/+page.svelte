@@ -1,4 +1,3 @@
-
 <main class="centered">
     <header>
         <h1>Crossword Game</h1>
@@ -158,6 +157,7 @@ main ul{
 
 .block{
     background-color: black;
+    position:relative;
 }
 
 .cell {
