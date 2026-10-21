@@ -81,7 +81,7 @@
 			height="240"
 		/>
 		<div>
-			<h1>Hi, I'm Ethan</h1>
+			<h1>A Little About Me...</h1>
 			<p class="lead">
 				A software engineer with a background in commissioning industrial power systems. I like
 				understanding how complex systems fit together, and building reliable software people
