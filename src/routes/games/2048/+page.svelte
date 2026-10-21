@@ -1,228 +1,241 @@
 <script>
-    import Controls from '#lib/components/Controls.svelte';
-    import {move, hasMoves, spawn, score} from '@ethanhua/arcade-core';
-    import {fade, scale, fly} from 'svelte/transition';
-    import { prefersReducedMotion } from 'svelte/motion';
-    import {scores} from '#lib/state/scores.svelte.js';
-    const empty = Array.from({length:4}, ()=>Array(4).fill(0));
+	import Controls from '#lib/components/Controls.svelte';
+	import {
+		hasMoves,
+		areSameBoard,
+		hasWon,
+		moveTiles,
+		spawnTile,
+		scoreTiles,
+		tilesToBoard
+	} from '@ethanhua/arcade-core';
+	import { fade, scale } from 'svelte/transition';
+	import { prefersReducedMotion } from 'svelte/motion';
+	import { scores } from '#lib/state/scores.svelte.js';
 
+	const SAVE_KEY = '2048-game';
+	const BEST_KEY = '2048-best';
+	const keys = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down' };
 
-    $effect(() => {
-        try {
-            localStorage.setItem('2048-game', JSON.stringify({ board, total }));
-        } catch {
-        }
-    });
-    function loadGame() {
-        try {
-            const saved = JSON.parse(localStorage.getItem('2048-game'));
-            if (saved && Array.isArray(saved.board)) {
-                return saved;
-            }
-        } catch {
-        }
-        return { board: spawn(spawn(empty)), total: 0 };
-    }
-    $effect(() => {
-	try {
-		localStorage.setItem('2048-best', String(scores.best));
-	} catch {}
-    });
-    const saved = loadGame();
-    let board = $state(saved.board);
-    let total = $state(saved.total);
-    // let board = $state([[1024, 1024, 256, 512],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0]]);
+	function startingTiles(firstId) {
+		const one = spawnTile([], firstId);
+		return spawnTile(one, firstId + 1);
+	}
 
-    const keys={ArrowLeft:'left', ArrowRight:'right', ArrowUp:'up', ArrowDown:'down'};
-    const win = $derived(hasWon(board));
-    const gameOver = $derived(!hasMoves(board));
-    function newGame(){
-        board = spawn(spawn(empty));
-        total = 0;
-    }
-    function areSameBoard(board1, board2){
-        const n = board1.length;
-        for(let i=0; i<n; i++){
-            for(let j=0; j<n; j++){
-                if(board1[i][j]!==board2[i][j]){
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
+	function loadGame() {
+		try {
+			const saved = JSON.parse(localStorage.getItem(SAVE_KEY));
+			if (saved && Array.isArray(saved.tiles)) {
+				const maxId = Math.max(0, ...saved.tiles.map((tile) => tile.id));
+				return {
+					tiles: saved.tiles,
+					nextID: Math.max(Number(saved.nextID) || 0, maxId + 1),
+					total: Number(saved.total) || 0
+				};
+			}
+		} catch {
+			// Corrupt or unreadable save: fall through to a new game
+		}
+		return { tiles: startingTiles(1), nextID: 3, total: 0 };
+	}
 
-    function hasWon(board){
-        return board.some(row => row.some(cell => cell >= 2048));
-    }
+	const saved = loadGame();
+	let tiles = $state(saved.tiles);
+	let nextID = $state(saved.nextID);
+	let total = $state(saved.total);
 
-    function handleKey(event){
-        if(!(event.key in keys)){
-            return;
-        }
-        event.preventDefault();
-        const direction = keys[event.key];
-        moveBoard(direction);
-    }
+	const board = $derived(tilesToBoard(tiles));
+	const win = $derived(hasWon(board));
+	const gameOver = $derived(!hasMoves(board));
 
-    function moveBoard(direction){
-        const moved = move(board, direction);
-        if(areSameBoard(board, moved)){
-            return;
-        }
-        total+=score(board, direction);
-        scores.best = Math.max(scores.best, total);
-        board = spawn(moved);
-    }
-    
+	$effect(() => {
+		try {
+			localStorage.setItem(SAVE_KEY, JSON.stringify({ tiles, nextID, total }));
+		} catch {
+			// Storage unavailable: the game still works, it just won't be saved
+		}
+	});
 
+	$effect(() => {
+		try {
+			localStorage.setItem(BEST_KEY, String(scores.best));
+		} catch {
+			// Storage unavailable
+		}
+	});
+
+	function newGame() {
+		tiles = startingTiles(nextID);
+		nextID += 2;
+		total = 0;
+	}
+
+	function moveBoard(direction) {
+		const moved = moveTiles(tiles, direction);
+		if (areSameBoard(tilesToBoard(moved), board)) {
+			return;
+		}
+		total += scoreTiles(tiles, direction);
+		scores.best = Math.max(total, scores.best);
+		tiles = spawnTile(moved, nextID);
+		nextID++;
+	}
+
+	function handleKey(event) {
+		if (!(event.key in keys)) {
+			return;
+		}
+		event.preventDefault();
+		moveBoard(keys[event.key]);
+	}
 </script>
+
 <svelte:window onkeydown={handleKey} />
+
 <main class="centered">
-    <header class="centered">
-        <div class="titles">
-            <h1>2048</h1>
-        </div>
-    </header>
-    <div class="status" aria-live="polite">
-        {#if gameOver}
-        <div class="status-gameOver" in:scale={{ duration:prefersReducedMotion.current?0:400, start: 0.5 }} out:fade>Game Over</div>
-        {/if}
-        {#if win&&!gameOver}
-            <div class="status-win" transition:fade>You Win!</div>
-        {/if}
-    </div>
-    <div class="scores">
-        <div>Score: {total}</div>
-        <button class="newGame" onclick={newGame}>New Game</button>
-        <div>Best: {scores.best}</div>
-    </div>
-    <div class={win?"winBoard":"board"}>
-        {#each board as row}
-            {#each row as cell}
-                {#if cell!==0}
-                    <div
-                    class="hasValue"
-                    style:background-color={`var(--tile-${cell}, var(--tile-2048))`}
-                    style:color={`var(--tile-${cell}-txt, var(--tile-2048-txt))`}
-                    >{cell}</div>
-                {:else}
-                    <div class="empty"></div>
-                {/if}
-            {/each}
-        {/each}
-    </div>
-    <Controls onmove={moveBoard}/>
+	<header class="centered">
+		<div class="titles">
+			<h1>2048</h1>
+		</div>
+	</header>
+
+	<div class="status" aria-live="polite">
+		{#if gameOver}
+			<div
+				class="status-gameOver"
+				in:scale={{ duration: prefersReducedMotion.current ? 0 : 400, start: 0.5 }}
+				out:fade
+			>Game Over</div>
+		{/if}
+		{#if win && !gameOver}
+			<div class="status-win" transition:fade>You Win!</div>
+		{/if}
+	</div>
+
+	<div class="scores">
+		<div aria-live="polite">Score: {total}</div>
+		<button class="newGame" onclick={newGame}>Restart</button>
+		<div aria-live="polite">Best: {scores.best}</div>
+	</div>
+
+	<div class="board" class:win>
+		{#each board as row}
+			{#each row as cell}
+				{#if cell !== 0}
+					<div
+						class="hasValue"
+						style:background-color={`var(--tile-${cell}, var(--tile-2048))`}
+						style:color={`var(--tile-${cell}-txt, var(--tile-2048-txt))`}
+					>{cell}</div>
+				{:else}
+					<div class="empty"></div>
+				{/if}
+			{/each}
+		{/each}
+	</div>
+
+	<Controls onmove={moveBoard} />
 </main>
+
 <footer>
-    <p>&copy; 2026 Chang Chi (Ethan) Hua</p>
+	<p>&copy; 2026 Chang Chi (Ethan) Hua</p>
 </footer>
 
-
 <style>
-    .winBoard{
-        display:grid;
-        width:min(80vw, 500px);
-        grid-template-columns: repeat(4, 1fr);
-        gap: 8px;
-        margin:10px;
-        border:4px solid rgb(236, 0, 0);
-        padding: 10px;
-        border-radius: 15px;
-        background-color: gold;
-        background-image: url("/images/yujiro.png");
-        background-repeat: no-repeat; 
-        background-position: center; 
-        background-size: cover; 
-    }
-    .board{
-        display:grid;
-        width:min(80vw, 500px);
-        grid-template-columns: repeat(4, 1fr);
-        gap: 8px;
-        margin:10px;
-        padding: 10px;
-        border-radius: 15px;
-        background-color: var(--color-bg-2048);
-        border:4px solid var(--color-title-2048);
-    }
-    .hasValue{
-        font-size: clamp(16px, 6vw, 30px);
-        font-weight: bold;
-        aspect-ratio: 1;
-        display: grid;
-        place-items: center;
-        border-radius: min(15px, 2vw); 
-        border:1px solid var(--color-title-2048);
-    }
-    .empty{
-        aspect-ratio: 1;
-        display: grid;
-        place-items: center;
-        border-radius: min(15px, 2vw);
-    }
-    h1{
-        margin:0px;
-        margin-top: 5px;
-        font-size: clamp(3rem, 20vw, 70px);
-        font-weight: bold;
-        -webkit-text-stroke: 3px var(--color-bg-2048);
-        text-shadow: 5px 5px 0 rgb(0, 0, 0);
-        font-family: var(--font-2048);
-        color:var(--color-title-2048);
-    }
-    .scores{
-        display: flex;
-        color:var(--color-title-2048);
-        font-weight: bold;
-        font-size: clamp(1.1rem, 5vw, 20px);
-        width: 90%;
-        align-items: center;
-        justify-content: space-around;
-    }
-
-    .status-gameOver{
-        margin:0px;
-        font-family: var(--font-2048);
-        font-size:clamp(40px,5vw, 70px);
-        font-weight: bold;
-        text-shadow: 5px 5px 0 rgb(0, 0, 0);
-        color:rgb(174, 1, 1);
-        padding:10px;
-    }
-    .status {
-	    display: grid;
-        min-height: 5rem;
-    }
-    .status > * {
-        grid-area: 1 / 1;
-    }
-    .status-win{
-        margin:0px;
-        font-weight: bold;
-        font-size:clamp(40px, 5vw, 70px);
-        font-family: var(--font-2048);
-        text-shadow: 5px 5px 0 rgb(0, 0, 0);
-        -webkit-text-stroke: 2px rgb(255, 0, 0);
-        color:rgb(255, 230, 0);
-        padding: 10px;
-    }
-    .newGame{
-        color: var(--color-title-2048);
-        font-weight: bold;
-        font-size: clamp(1.1rem, 5vw, 20px);
-        margin:0px;
-        padding:5px;
-        border-radius: 15px;
-        background-color: white;
-    }
-    .titles{
-        display: flex;
-        width: min(80vw, 500px);
-        flex-direction: column;
-        align-items: center;
-        margin:5px;
-        padding:5px;
-    }
-    
+	.board {
+		display: grid;
+		width: min(80vw, 500px);
+		grid-template-columns: repeat(4, 1fr);
+		gap: 8px;
+		margin: 10px;
+		padding: 10px;
+		border-radius: 15px;
+		background-color: var(--color-bg-2048);
+		border: 4px solid var(--color-title-2048);
+	}
+	.board.win {
+		border-color: rgb(236, 0, 0);
+		background-color: gold;
+		background-image: url('/images/yujiro.png');
+		background-repeat: no-repeat;
+		background-position: center;
+		background-size: cover;
+	}
+	.hasValue {
+		font-size: clamp(16px, 6vw, 30px);
+		font-weight: bold;
+		aspect-ratio: 1;
+		display: grid;
+		place-items: center;
+		border-radius: min(15px, 2vw);
+		border: 1px solid var(--color-title-2048);
+	}
+	.empty {
+		aspect-ratio: 1;
+		display: grid;
+		place-items: center;
+		border-radius: min(15px, 2vw);
+	}
+	h1 {
+		margin: 0;
+		margin-top: 5px;
+		font-size: clamp(3rem, 20vw, 70px);
+		font-weight: bold;
+		-webkit-text-stroke: 3px var(--color-bg-2048);
+		text-shadow: 5px 5px 0 rgb(0, 0, 0);
+		font-family: var(--font-2048);
+		color: var(--color-title-2048);
+	}
+	.scores {
+		display: flex;
+		color: var(--color-title-2048);
+		font-weight: bold;
+		font-size: clamp(1.1rem, 5vw, 20px);
+		width: 90%;
+		align-items: center;
+		justify-content: space-around;
+	}
+	.status {
+		display: grid;
+		min-height: 5rem;
+	}
+	.status > * {
+		grid-area: 1 / 1;
+	}
+	.status-gameOver {
+		margin: 0;
+		font-family: var(--font-2048);
+		font-size: clamp(40px, 5vw, 70px);
+		font-weight: bold;
+		text-shadow: 5px 5px 0 rgb(0, 0, 0);
+		color: rgb(174, 1, 1);
+		padding: 10px;
+	}
+	.status-win {
+		margin: 0;
+		font-weight: bold;
+		font-size: clamp(40px, 5vw, 70px);
+		font-family: var(--font-2048);
+		text-shadow: 5px 5px 0 rgb(0, 0, 0);
+		-webkit-text-stroke: 2px rgb(255, 0, 0);
+		color: rgb(255, 230, 0);
+		padding: 10px;
+	}
+	.newGame {
+		color: var(--color-title-2048);
+		font-weight: bold;
+		font-size: clamp(1.1rem, 5vw, 20px);
+		margin: 0;
+		padding: 5px;
+		border-radius: 15px;
+		background-color: white;
+	}
+	.titles {
+		display: flex;
+		width: min(80vw, 500px);
+		flex-direction: column;
+		align-items: center;
+		margin: 5px;
+		padding: 5px;
+	}
 </style>

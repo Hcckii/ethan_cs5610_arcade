@@ -21,7 +21,7 @@
 		"#lib/*": "./src/lib/*"
 	},
 	"dependencies": {
-		"@ethanhua/arcade-core": "^1.0.0",
+		"@ethanhua/arcade-core": "^1.1.1",
 		"@fontsource/press-start-2p": "^5.3.0",
 		"@fontsource/vt323": "^5.3.0"
 	}
