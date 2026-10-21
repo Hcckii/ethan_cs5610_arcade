@@ -22,6 +22,31 @@
 		return spawnTile(one, firstId + 1);
 	}
 
+    const SWIPE_THRESHOLD = 30;
+    let startX = 0;
+    let startY = 0;
+
+    function handlePointerDown(event) {
+        startX = event.clientX;
+        startY = event.clientY;
+        event.currentTarget.setPointerCapture(event.pointerId);
+    }  
+
+    function handlePointerUp(event) {
+        const dx = event.clientX - startX;
+        const dy = event.clientY - startY;
+
+        if (Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE_THRESHOLD) {
+            return;
+        }
+
+        if (Math.abs(dx) > Math.abs(dy)) {
+            moveBoard(dx > 0 ? 'right' : 'left');
+        } else {
+            moveBoard(dy > 0 ? 'down' : 'up');
+        }
+    }
+
 	function loadGame() {
 		try {
 			const saved = JSON.parse(localStorage.getItem(SAVE_KEY));
@@ -40,7 +65,8 @@
 	}
 
 	const saved = loadGame();
-	let tiles = $state(saved.tiles);
+    let tiles = $state([{"id":1, "value":1024, "row":1, "col":2}, {"id":2, "value":1024, "row":1, "col":3}]);
+	// let tiles = $state(saved.tiles);
 	let nextID = $state(saved.nextID);
 	let total = $state(saved.total);
 
@@ -117,22 +143,23 @@
 		<button class="newGame" onclick={newGame}>Restart</button>
 		<div aria-live="polite">Best: {scores.best}</div>
 	</div>
-
-	<div class="board" class:win>
-		{#each board as row}
-			{#each row as cell}
-				{#if cell !== 0}
-					<div
-						class="hasValue"
-						style:background-color={`var(--tile-${cell}, var(--tile-2048))`}
-						style:color={`var(--tile-${cell}-txt, var(--tile-2048-txt))`}
-					>{cell}</div>
-				{:else}
-					<div class="empty"></div>
-				{/if}
-			{/each}
-		{/each}
-	</div>
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div class="board" class:win onpointerdown={handlePointerDown} onpointerup={handlePointerUp}>
+        {#each Array(16) as _, i (i)}
+            <div class="empty"></div>
+        {/each}
+    
+        {#each tiles as tile (tile.id)}
+            <div
+                class="tile"
+                in:scale={{ duration: prefersReducedMotion.current ? 0 : 150, start: 0.5 }}
+                style:--row={tile.row}
+                style:--col={tile.col}
+                style:background-color={`var(--tile-${tile.value}, var(--tile-2048))`}
+                style:color={`var(--tile-${tile.value}-txt, var(--tile-2048-txt))`}
+            >{tile.value}</div>
+        {/each}
+    </div>
 
 	<Controls onmove={moveBoard} />
 </main>
@@ -143,12 +170,16 @@
 
 <style>
 	.board {
-		display: grid;
+        touch-action: none;
+        --gap: 8px;
+        --pad: 10px;
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--gap);
+        padding: var(--pad);
 		width: min(80vw, 500px);
-		grid-template-columns: repeat(4, 1fr);
-		gap: 8px;
 		margin: 10px;
-		padding: 10px;
 		border-radius: 15px;
 		background-color: var(--color-bg-2048);
 		border: 4px solid var(--color-title-2048);
@@ -161,7 +192,17 @@
 		background-position: center;
 		background-size: cover;
 	}
-	.hasValue {
+	.tile {
+        position: absolute;
+        top: var(--pad);
+        left: var(--pad);
+        width: calc((100% - 2 * var(--pad) - 3 * var(--gap)) / 4);
+        aspect-ratio: 1;
+        transform: translate(
+            calc(var(--col) * (100% + var(--gap))),
+            calc(var(--row) * (100% + var(--gap)))
+        );
+	    transition: transform 120ms ease-in-out;
 		font-size: clamp(16px, 6vw, 30px);
 		font-weight: bold;
 		aspect-ratio: 1;
@@ -170,11 +211,18 @@
 		border-radius: min(15px, 2vw);
 		border: 1px solid var(--color-title-2048);
 	}
+
+    @media (prefers-reduced-motion: reduce) {
+	.tile {
+		transition: none;
+	}
+}
 	.empty {
 		aspect-ratio: 1;
 		display: grid;
 		place-items: center;
 		border-radius: min(15px, 2vw);
+        background-color: rgba(255, 255, 255, 0.26);
 	}
 	h1 {
 		margin: 0;
