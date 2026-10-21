@@ -65,8 +65,7 @@
 	}
 
 	const saved = loadGame();
-    let tiles = $state([{"id":1, "value":1024, "row":1, "col":2}, {"id":2, "value":1024, "row":1, "col":3}]);
-	// let tiles = $state(saved.tiles);
+	let tiles = $state(saved.tiles);
 	let nextID = $state(saved.nextID);
 	let total = $state(saved.total);
 
