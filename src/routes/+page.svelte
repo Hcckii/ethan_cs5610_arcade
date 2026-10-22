@@ -35,7 +35,7 @@
 				science at Northeastern. Welcome to my arcade.
 			</p>
 			<div class="actions">
-				<a class="button primary" href="#games">Play a game</a>
+				<a class="button primary" href="/games/2048">Play a game</a>
 				<a class="button secondary" href="/about">About me</a>
 			</div>
 		</div>

@@ -4,9 +4,9 @@
     </header>
 
     <ul>
-        <li><a href="mailto:ethanhua052@gmail.com">Email</a></li>
-        <li><a href="https://www.linkedin.com/in/chang-chi-hua-4b0739268/">LinkedIn</a></li>
-        <li><a href="https://github.com/Hcckii">Github</a></li>
+        <li class="red"><a href="mailto:ethanhua052@gmail.com">Email</a></li>
+        <li class="blue"><a href="https://www.linkedin.com/in/chang-chi-hua-4b0739268/">LinkedIn</a></li>
+        <li class="black"><a href="https://github.com/Hcckii">Github</a></li>
     </ul>
     <img src="/images/sasun-bughdaryan-FzSGR5YbyFw-unsplash.jpg" alt="contact me">
 </main>
@@ -36,12 +36,25 @@ a {
     transition: background-color 0.2s;
 }
 ul li{
-    color:var(--color-title);
     font-weight: bold;
     font-size: 20px;
-    border:2px solid var(--color-title);
     padding:5px;
-    border-radius: 15px;
+    border-radius: 10px;
+}
+.blue{
+    background-color: rgb(0, 119, 181);
+    color:white;
+    border:2px solid black;
+}
+.red{
+    background-color: rgb(193, 154, 107);
+    color: rgb(255, 255, 255);
+    border: 2px solid rgb(186, 2, 2);
+}
+.black{
+    background-color: var(--color-title);
+    color:white;
+    border:2px solid black;
 }
 img{
     width:80vw;
@@ -49,7 +62,6 @@ img{
     margin:20px;
     border-radius: 30px;
 }
-
 @media (min-width:864px) {
     img{
         width:60vw;
