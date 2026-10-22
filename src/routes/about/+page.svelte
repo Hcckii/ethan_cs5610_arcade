@@ -26,10 +26,15 @@
 			place: 'Northeastern University · Seattle, WA'
 		},
 		{
-			period: '2023',
+			period: '2018-2023',
 			title: 'B.S. Electronic Engineering',
 			place: 'Southern Taiwan University of Science and Technology'
-		}
+		},
+        {
+            period: '2018',
+            title: 'Computer Science',
+            place: 'Shin Shing HighSchool Taiwan, Taoyuan City'
+        }
 	];
 
 	const skills = [
@@ -202,8 +207,8 @@
 		</div>
 		<p>
 			You'll usually find me working out, skiing, hiking, playing sports, or exploring new
-			restaurants around Seattle with friends. Moving from Taiwan to the U.S. and changing careers
-			has been a big shift, and one of the most rewarding things I've done.
+			restaurants around Seattle with friends.(also a huge gamer, shoot me a message if ya down to game!) 
+            Moving from Taiwan to the U.S. and changing careers has been a big shift, and one of the most rewarding things I've done.
 		</p>
 	</section>
 
