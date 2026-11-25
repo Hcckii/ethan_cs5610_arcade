@@ -11,45 +11,47 @@
 	} from '@ethanhua/arcade-core';
 	import { fade, scale } from 'svelte/transition';
 	import { prefersReducedMotion } from 'svelte/motion';
-	import { scores } from '#lib/state/scores.svelte.js';
+	import { page } from '$app/state';
+	import { scores, saveBest } from '#lib/state/scores.svelte.js';
 
-	const SAVE_KEY = '2048-game';
-	const BEST_KEY = '2048-best';
 	const keys = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down' };
+
+	// Each user (or "guest" when logged out) has their own saved game
+	const saveKey = $derived(`2048-game:${page.data.user?.id ?? 'guest'}`);
 
 	function startingTiles(firstId) {
 		const one = spawnTile([], firstId);
 		return spawnTile(one, firstId + 1);
 	}
 
-    const SWIPE_THRESHOLD = 30;
-    let startX = 0;
-    let startY = 0;
+	const SWIPE_THRESHOLD = 30;
+	let startX = 0;
+	let startY = 0;
 
-    function handlePointerDown(event) {
-        startX = event.clientX;
-        startY = event.clientY;
-        event.currentTarget.setPointerCapture(event.pointerId);
-    }  
+	function handlePointerDown(event) {
+		startX = event.clientX;
+		startY = event.clientY;
+		event.currentTarget.setPointerCapture(event.pointerId);
+	}
 
-    function handlePointerUp(event) {
-        const dx = event.clientX - startX;
-        const dy = event.clientY - startY;
+	function handlePointerUp(event) {
+		const dx = event.clientX - startX;
+		const dy = event.clientY - startY;
 
-        if (Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE_THRESHOLD) {
-            return;
-        }
+		if (Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE_THRESHOLD) {
+			return;
+		}
 
-        if (Math.abs(dx) > Math.abs(dy)) {
-            moveBoard(dx > 0 ? 'right' : 'left');
-        } else {
-            moveBoard(dy > 0 ? 'down' : 'up');
-        }
-    }
+		if (Math.abs(dx) > Math.abs(dy)) {
+			moveBoard(dx > 0 ? 'right' : 'left');
+		} else {
+			moveBoard(dy > 0 ? 'down' : 'up');
+		}
+	}
 
-	function loadGame() {
+	function loadGame(key) {
 		try {
-			const saved = JSON.parse(localStorage.getItem(SAVE_KEY));
+			const saved = JSON.parse(localStorage.getItem(key));
 			if (saved && Array.isArray(saved.tiles)) {
 				const maxId = Math.max(0, ...saved.tiles.map((tile) => tile.id));
 				return {
@@ -64,28 +66,35 @@
 		return { tiles: startingTiles(1), nextID: 3, total: 0 };
 	}
 
-	const saved = loadGame();
-	let tiles = $state(saved.tiles);
-	let nextID = $state(saved.nextID);
-	let total = $state(saved.total);
+	let tiles = $state([]);
+	let nextID = $state(1);
+	let total = $state(0);
+	let loadedKey = $state(null);
 
 	const board = $derived(tilesToBoard(tiles));
-	const win = $derived(hasWon(board));
-	const gameOver = $derived(!hasMoves(board));
+	const ready = $derived(loadedKey === saveKey);
+	const win = $derived(ready && hasWon(board));
+	const gameOver = $derived(ready && !hasMoves(board));
 
+	// Load this user's saved game, and again whenever the logged-in user changes
 	$effect(() => {
-		try {
-			localStorage.setItem(SAVE_KEY, JSON.stringify({ tiles, nextID, total }));
-		} catch {
-			// Storage unavailable: the game still works, it just won't be saved
-		}
+		const key = saveKey;
+		const saved = loadGame(key);
+		tiles = saved.tiles;
+		nextID = saved.nextID;
+		total = saved.total;
+		loadedKey = key;
 	});
 
+	// Save after every change, but only into the key the game was loaded from,
+	// so one user's board is never written into another user's save
 	$effect(() => {
+		const game = { tiles, nextID, total };
+		if (loadedKey !== saveKey) return;
 		try {
-			localStorage.setItem(BEST_KEY, String(scores.best));
+			localStorage.setItem(loadedKey, JSON.stringify(game));
 		} catch {
-			// Storage unavailable
+			// Storage unavailable: the game still works, it just won't be saved
 		}
 	});
 
@@ -101,7 +110,7 @@
 			return;
 		}
 		total += scoreTiles(tiles, direction);
-		scores.best = Math.max(total, scores.best);
+		saveBest(total);
 		tiles = spawnTile(moved, nextID);
 		nextID++;
 	}
@@ -142,23 +151,23 @@
 		<button class="newGame" onclick={newGame}>Restart</button>
 		<div aria-live="polite">Best: {scores.best}</div>
 	</div>
-    <!-- svelte-ignore a11y_no_static_element_interactions -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div class="board" class:win onpointerdown={handlePointerDown} onpointerup={handlePointerUp}>
-        {#each Array(16) as _, i (i)}
-            <div class="empty"></div>
-        {/each}
-    
-        {#each tiles as tile (tile.id)}
-            <div
-                class="tile"
-                in:scale={{ duration: prefersReducedMotion.current ? 0 : 150, start: 0.5 }}
-                style:--row={tile.row}
-                style:--col={tile.col}
-                style:background-color={`var(--tile-${tile.value}, var(--tile-2048))`}
-                style:color={`var(--tile-${tile.value}-txt, var(--tile-2048-txt))`}
-            >{tile.value}</div>
-        {/each}
-    </div>
+		{#each Array(16) as _, i (i)}
+			<div class="empty"></div>
+		{/each}
+
+		{#each tiles as tile (tile.id)}
+			<div
+				class="tile"
+				in:scale={{ duration: prefersReducedMotion.current ? 0 : 150, start: 0.5 }}
+				style:--row={tile.row}
+				style:--col={tile.col}
+				style:background-color={`var(--tile-${tile.value}, var(--tile-2048))`}
+				style:color={`var(--tile-${tile.value}-txt, var(--tile-2048-txt))`}
+			>{tile.value}</div>
+		{/each}
+	</div>
 
 	<Controls onmove={moveBoard} />
 </main>
@@ -169,14 +178,14 @@
 
 <style>
 	.board {
-        touch-action: none;
-        --gap: 8px;
-        --pad: 10px;
-        position: relative;
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: var(--gap);
-        padding: var(--pad);
+		touch-action: none;
+		--gap: 8px;
+		--pad: 10px;
+		position: relative;
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: var(--gap);
+		padding: var(--pad);
 		width: min(80vw, 500px);
 		margin: 10px;
 		border-radius: 15px;
@@ -192,36 +201,35 @@
 		background-size: cover;
 	}
 	.tile {
-        position: absolute;
-        top: var(--pad);
-        left: var(--pad);
-        width: calc((100% - 2 * var(--pad) - 3 * var(--gap)) / 4);
-        aspect-ratio: 1;
-        transform: translate(
-            calc(var(--col) * (100% + var(--gap))),
-            calc(var(--row) * (100% + var(--gap)))
-        );
-	    transition: transform 120ms ease-in-out;
+		position: absolute;
+		top: var(--pad);
+		left: var(--pad);
+		width: calc((100% - 2 * var(--pad) - 3 * var(--gap)) / 4);
+		aspect-ratio: 1;
+		transform: translate(
+			calc(var(--col) * (100% + var(--gap))),
+			calc(var(--row) * (100% + var(--gap)))
+		);
+		transition: transform 120ms ease-in-out;
 		font-size: clamp(16px, 6vw, 30px);
 		font-weight: bold;
-		aspect-ratio: 1;
 		display: grid;
 		place-items: center;
 		border-radius: min(15px, 2vw);
 		border: 1px solid var(--color-title-2048);
 	}
 
-    @media (prefers-reduced-motion: reduce) {
-	.tile {
-		transition: none;
+	@media (prefers-reduced-motion: reduce) {
+		.tile {
+			transition: none;
+		}
 	}
-}
 	.empty {
 		aspect-ratio: 1;
 		display: grid;
 		place-items: center;
 		border-radius: min(15px, 2vw);
-        background-color: rgba(255, 255, 255, 0.26);
+		background-color: rgba(255, 255, 255, 0.26);
 	}
 	h1 {
 		margin: 0;

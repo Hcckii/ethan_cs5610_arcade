@@ -55,7 +55,7 @@
 				href="/games/2048"
 				detail={bestText}
 			/>
-			<GameCard title="Next game" description="Something new is on the way." />
+			<GameCard title="Battleship" description="Under construction..." />
 		</div>
 	</section>
 

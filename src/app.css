@@ -1,3 +1,13 @@
+@font-face {
+    font-family: "256 Bytes";
+    src: url("/fonts/256Bytes.otf") format("opentype");
+    font-display: swap;
+}
+@font-face {
+    font-family: "Glass_TTY_VT220";
+    src: url("/fonts/Glass_TTY_VT220.ttf") format("opentype");
+    font-display: swap;
+}
 :root {
     --color-bg: rgb(245, 250, 253);
     --color-title:rgb(44, 44, 44);
@@ -7,6 +17,13 @@
     --color-focus: #834848;
     --color-bg-2048:#8bafc3;
     --color-title-2048:#2f5a73;
+    --color-bg-bs: black;
+    --color-font-bs: #33ff66;
+    --color-carrier: #6a3d9a;
+    --color-battleship: #1f4e79;
+    --color-cruiser: #2e6b30;
+    --color-submarine: #8a4b08;
+    --color-destroyer: #a0204a;
 	--tile-2: #f9eee7;
     --tile-2-txt: #342214;
 	--tile-4: #f4decd;
@@ -30,6 +47,8 @@
 	--tile-2048: #492509;
     --tile-2048-txt: #ffffff;
     --font-2048:'Press Start 2P';
+    --font-bs:"Glass_TTY_VT220", "Press Start 2P", monospace;
+
 }
 
 *{

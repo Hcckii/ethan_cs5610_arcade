@@ -4,11 +4,18 @@
 	import favicon from '#lib/assets/favicon.svg';
 	import '../app.css';
 	import NavBar from '#lib/components/NavBar.svelte';
-	let { children } = $props();
+	import { useScoresFor } from '#lib/state/scores.svelte.js';
+
+	let { data, children } = $props();
+
+	$effect(() => {
+		useScoresFor(data.user?.id ?? null);
+	});
 
 </script>
-<NavBar />
+<NavBar user={data.user} />
 <svelte:head>
 	<link rel="icon" href={favicon} />
 </svelte:head>
 {@render children()}
+

@@ -1,7 +1,14 @@
 <script>
     import NavLink from '#lib/components/NavLink.svelte';
+
+    let { user } = $props();
+
     const navLinks = [{href:'/', label:'Home'}, {href:'/about', label:'About Me'}, {href:'/contact', label:'Contact'}];
-    const gameLinks = [{href:'/games/crossword', label:'Crossword'}, {href:'/games/2048', label:'2048'}];
+    const gameLinks = [
+        {href:'/games/crossword', label:'Crossword'},
+        {href:'/games/2048', label:'2048'},
+        {href:'/games/battleship', label:'Battleship'},
+    ];
 </script>
 
 <nav>
@@ -11,6 +18,17 @@
     </div>
     <div class="content">
 	<ul class="contentUl">
+        {#if user}
+            <details>
+                <summary>Hi, {user.email}</summary>
+                    <form method="POST" action="/logout">
+                        <button type="submit" class="logout">Log out</button>
+                    </form>
+            </details>
+        {:else}
+            <li><NavLink href="/login" label="Log in" /></li>
+            <li><NavLink href="/register" label="Register" /></li>
+        {/if}
 		{#each navLinks as link (link.href)}
             <li>
                 <NavLink href={link.href} label={link.label} />
@@ -73,6 +91,27 @@ nav {
     align-items: center;
     gap:5px;
 }
+
+.logout {
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    padding: 0;
+    cursor: pointer;
+    text-decoration: underline;
+}
+.logout:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 2px;
+}
+.user {
+    overflow-wrap: anywhere;
+}
+.contentUl form {
+    margin: 0;
+}
+
 @media (max-width: 600px) {
 	nav {
 		flex-direction: column;
