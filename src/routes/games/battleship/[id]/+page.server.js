@@ -1,4 +1,4 @@
-import { error, fail } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
 import { api } from '#lib/server/api.js';
 
 export async function load({ params, locals }) {
@@ -52,6 +52,29 @@ export const actions = {
 		};
 	},
 
+	// Extra credit: confirm my own fleet (or the random one)
+	place: async ({ request, params, locals }) => {
+		if (!locals.token) {
+			return fail(401, { error: 'Log in to place your ships' });
+		}
+		const form = await request.formData();
+		let ships;
+		try {
+			ships = JSON.parse(String(form.get('ships') ?? ''));
+		} catch {
+			return fail(400, { error: 'The fleet could not be read' });
+		}
+		const res = await api(`/games/${encodeURIComponent(params.id)}/ships`, {
+			method: 'POST',
+			token: locals.token,
+			body: { ships }
+		});
+		if (!res.ok) {
+			return fail(res.status, { error: res.data?.error ?? 'Could not place your ships' });
+		}
+		return { placedShips: true };
+	},
+
 	// Extra credit: make the AI the second player in my own waiting game
 	challengeAi: async ({ params, locals }) => {
 		if (!locals.token) {
@@ -66,5 +89,25 @@ export const actions = {
 			return fail(res.status, { error: res.data?.error ?? 'Could not challenge the AI' });
 		}
 		return { challenged: true };
+	},
+
+	// Surrender a game in progress, or cancel a game that is still waiting for a second player
+	surrender: async ({ params, locals }) => {
+		if (!locals.token) {
+			return fail(401, { error: 'Log in to leave a game' });
+		}
+		const res = await api(`/games/${encodeURIComponent(params.id)}/players/me`, {
+			method: 'DELETE',
+			token: locals.token
+		});
+		if (!res.ok) {
+			return fail(res.status, { error: res.data?.error ?? 'Could not leave the game' });
+		}
+		// A cancelled waiting game no longer exists, so go back to the list.
+		// After a surrender the game is finished, so stay here and show the result.
+		if (res.data.deleted) {
+			redirect(303, '/games/battleship');
+		}
+		return { surrendered: true };
 	}
 };
