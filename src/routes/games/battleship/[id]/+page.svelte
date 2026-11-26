@@ -114,7 +114,9 @@
             {:else}
                 <p class="result">{game.players[game.winner]} won this game.</p>
             {/if}
-        
+            <div>
+                <p>Click refresh to update result from the enemy</p>
+            </div>
             {#if game.status !== 'finished'}
                 <button type="button" class="refresh" onclick={refresh} disabled={refreshing}>
                     {refreshing ? 'Refreshing...' : 'Refresh'}

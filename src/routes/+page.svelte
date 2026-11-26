@@ -55,7 +55,11 @@
 				href="/games/2048"
 				detail={bestText}
 			/>
-			<GameCard title="Battleship" description="Under construction..." />
+			<GameCard 
+				title="Battleship" 
+				description="Sink your opponent's fleet in a two-player game, or challenge the AI. Log in to play." 
+				href="/games/battleship"
+			/>
 		</div>
 	</section>
 
