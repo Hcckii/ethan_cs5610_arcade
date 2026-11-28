@@ -56,6 +56,7 @@ src/
     contact/                   Contact
     games/crossword/           Crossword
     games/2048/                2048 (client-only rendering, see +page.js)
+    games/battleship/          battleship
 ```
 
 ## Package vs. app
